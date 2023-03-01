@@ -29,24 +29,20 @@ private:
     juce::AudioProcessorValueTreeState& treeState;
     
 
+    
+    float delayInSamples {0};
+    double sampleRate = {44100.f};
+    int samplesPerBlock = {512};
+    float delayBufferLength = 192000;
+    int numChannels = {2};
+    
+//    std::array<juce::SmoothedValue<float, juce::Interpolators::Linear>, 2> smoothDelayTime;
+    juce::SmoothedValue<float, juce::Interpolators::WindowedSinc> smoothDelayTime {0};
 
-
-    std::array<juce::SmoothedValue<float, juce::Interpolators::Linear>, 2> smoothDelayTime;
-//    std::array<juce::SmoothedValue<float>, 2> smoothGain;
     std::array<juce::SmoothedValue<float>, 2> smoothMix;
     std::array<juce::SmoothedValue<float>, 2> smoothFeedback;
     std::array<float, 2> lastDelayOutput;
+    std::array<juce::dsp::DelayLine<float>, 2> delayLines {{juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>(delayBufferLength), juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> (delayBufferLength)}};
+    juce::dsp::DryWetMixer<float> mixer;
     
-    float delayTimeInSamples {0};
-    double sampleRate = {44100.f};
-    int samplesPerBlock = {512};
-    static const int delayBufferLength = 192000;
-    int numChannels = {2};
-    
-    
-    
-    std::array<float, 2> lastDelayOutputL;
-    std::array<float, 2> lastDelayOutputR;
-    std::array<float, delayBufferLength> leftDelayLine, rightDelayLine;
-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> leftDelay{delayBufferLength}, rightDelay{delayBufferLength};
 };
