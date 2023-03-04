@@ -62,6 +62,10 @@ public:
 private:
     
     Delay delayEffect;
+    
+    double bpm = {120};
+    juce::AudioPlayHead* playHead;
+    juce::AudioPlayHead::CurrentPositionInfo cpi;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CircularDelayAudioProcessor)

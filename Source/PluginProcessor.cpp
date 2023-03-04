@@ -142,10 +142,16 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
     
-
-
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    
+    double bpm = 120;
+    if (auto bpmFromHost = *getPlayHead()->getPosition()->getBpm())
+    {
+        bpm = bpmFromHost;
+    }
+    delayEffect.setParameters();
+    delayEffect.setTime(bpm);
     
     delayEffect.process(buffer);
 
@@ -182,9 +188,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout
 CircularDelayAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    layout.add(std::make_unique<juce::AudioParameterFloat>("TIME", "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("FEEDBACK", "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("MIX", "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
+    
+    layout.add(std::make_unique<juce::AudioParameterFloat>  ("TIME", "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
+    layout.add(std::make_unique<juce::AudioParameterBool>   ("SYNC", "Sync", true));
+    layout.add(std::make_unique<juce::AudioParameterChoice> ("SYNC_TIME", "Sync Time", juce::StringArray{"16th", "16th Triplet", "16th Dotted",
+                                                             "8th", "8th Triplet", "8th Dotted", "Quarter", "Quarter Triplet", "Quarter Dotted",
+                                                             "Half", "Half Triplet", "Half Dotted", "Whole"}, 3, "Sync Time"));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  ("FEEDBACK", "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  ("MIX", "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
     return layout;
 }
 
@@ -194,3 +205,5 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new CircularDelayAudioProcessor();
 }
+
+
