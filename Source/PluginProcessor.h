@@ -57,13 +57,15 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
+    double getHostBpm() const;
+    
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState treeState {*this, nullptr, "Parameters", createParameterLayout()};
 private:
     
     Delay delayEffect;
     
-    double bpm = {120};
+    double bpm = {0};
     juce::AudioPlayHead* playHead;
     juce::AudioPlayHead::CurrentPositionInfo cpi;
 

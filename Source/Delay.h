@@ -20,11 +20,8 @@ public:
     void process(juce::AudioBuffer<float>& buffer);
     
     void setParameters();
-    float setTime(double bpm);
-
-
-
-        
+    void setTime(double bpm);
+            
 private:
     bool getSync();
     float getSyncTime();
@@ -35,21 +32,23 @@ private:
     
     juce::AudioProcessorValueTreeState& treeState;
     
-    
-    float delayInSamples {0};
+    float delayInSamples = {0};
     double sampleRate = {44100.f};
     int samplesPerBlock = {512};
-    float delayBufferLength = {44100};
+    int delayBufferLength = {44100};
     int numChannels = {2};
     
+    float centsPerSemitone = 100.0f / 12.0f;
+    float rate = 0.0f; // Declare the rate variable
+    
     constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
-    juce::SmoothedValue<float, juce::Interpolators::WindowedSinc> smoothDelayTime {0};
-    std::array<juce::SmoothedValue<float>, 2> smoothMix;
-    std::array<juce::SmoothedValue<float>, 2> smoothFeedback;
+    juce::SmoothedValue<float> smoothDelayTime;
+    juce::SmoothedValue<float> smoothFeedback;
     std::array<float, 2> lastDelayOutput;
     
-    std::array<juce::dsp::DelayLine<float>, 2> delayLines {{juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>(delayBufferLength), juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> (delayBufferLength)}};
-    juce::dsp::DryWetMixer<float> mixer;
+//    std::array<juce::dsp::DelayLine<float>, 2> delayLines {{juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd>(delayBufferLength), juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> (delayBufferLength)}};
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine {delayBufferLength};
+    juce::dsp::DryWetMixer<float> delayMixer;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)
 };

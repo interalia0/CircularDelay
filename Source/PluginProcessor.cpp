@@ -145,17 +145,9 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    double bpm = 120;
-    if (auto bpmFromHost = *getPlayHead()->getPosition()->getBpm())
-    {
-        bpm = bpmFromHost;
-    }
     delayEffect.setParameters();
-    delayEffect.setTime(bpm);
-    
+    delayEffect.setTime(getHostBpm());
     delayEffect.process(buffer);
-
-
 }
 
 //==============================================================================
@@ -183,6 +175,17 @@ void CircularDelayAudioProcessor::setStateInformation (const void* data, int siz
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+double CircularDelayAudioProcessor::getHostBpm() const
+{
+    double bpm = 120;
+    if (auto bpmFromHost = *getPlayHead()->getPosition()->getBpm())
+    {
+        bpm = bpmFromHost;
+    }
+    return bpm;
+}
+
 
 juce::AudioProcessorValueTreeState::ParameterLayout
 CircularDelayAudioProcessor::createParameterLayout()
