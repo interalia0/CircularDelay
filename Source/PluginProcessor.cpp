@@ -24,7 +24,7 @@ CircularDelayAudioProcessor::CircularDelayAudioProcessor()
 #endif
 
 {
-//    FOLEYS_SET_SOURCE_PATH(__FILE__);
+    
 }
 
 CircularDelayAudioProcessor::~CircularDelayAudioProcessor()
@@ -137,6 +137,7 @@ bool CircularDelayAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 }
 #endif
 
+
 void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -149,6 +150,7 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     delayEffect.setParameters();
     delayEffect.setTimeInSamples(getHostBpm());
     delayEffect.process(buffer);
+    
 }
 
 //==============================================================================
@@ -205,6 +207,14 @@ CircularDelayAudioProcessor::createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
     return layout;
 }
+
+//void CircularDelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
+//{
+//    if (parameterID == "TIME")
+//    {
+//        delayEffect.setTimeInSamples(getHostBpm());
+//    }
+//}
 
 //==============================================================================
 // This creates new instances of the plugin..
