@@ -28,8 +28,8 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     
-    foleys::MagicGUIState       magicState;
-    foleys::MagicGUIBuilder     magicBuilder { magicState };
+//    foleys::MagicGUIState       magicState;
+//    foleys::MagicGUIBuilder     magicBuilder { magicState };
     
     CircularDelayAudioProcessor& audioProcessor;
 

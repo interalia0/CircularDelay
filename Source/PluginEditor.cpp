@@ -16,8 +16,8 @@ CircularDelayAudioProcessorEditor::CircularDelayAudioProcessorEditor (CircularDe
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
-    magicState.setGuiValueTree (BinaryData::magic_xml, BinaryData::magic_xmlSize);
-    magicBuilder.createGUI (*this);
+//    magicState.setGuiValueTree (BinaryData::magic_xml, BinaryData::magic_xmlSize);
+//    magicBuilder.createGUI (*this);
 }
 
 CircularDelayAudioProcessorEditor::~CircularDelayAudioProcessorEditor()

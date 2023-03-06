@@ -14,7 +14,7 @@
 //==============================================================================
 /**
 */
-class CircularDelayAudioProcessor  : public foleys::MagicProcessor
+class CircularDelayAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif
@@ -35,8 +35,8 @@ public:
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
-//    juce::AudioProcessorEditor* createEditor() override;
-//    bool hasEditor() const override;
+    juce::AudioProcessorEditor* createEditor() override;
+    bool hasEditor() const override;
 
     //==============================================================================
     const juce::String getName() const override;
@@ -54,8 +54,8 @@ public:
     void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-//    void getStateInformation (juce::MemoryBlock& destData) override;
-//    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation (juce::MemoryBlock& destData) override;
+    void setStateInformation (const void* data, int sizeInBytes) override;
     
     double getHostBpm() const;
     

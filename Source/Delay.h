@@ -20,13 +20,18 @@ public:
     void process(juce::AudioBuffer<float>& buffer);
     
     void setParameters();
-    void setTime(double bpm);
+    void setTimeInSamples(double bpm);
             
 private:
-    bool getSync();
+    void setFilter();
+    void setTimeAndMode(int channel);
+    
+    bool isSync();
+    bool isPingPong();
     float getSyncTime();
     float getTime();
     float getFeedback();
+    float getWidth();
     float getMix();
     
     
@@ -43,6 +48,7 @@ private:
     
     constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
     juce::SmoothedValue<float, juce::Interpolators::Linear> smoothDelayTime;
+    juce::SmoothedValue<float, juce::Interpolators::Linear> smoothWidth;
     juce::SmoothedValue<float> smoothFeedback;
     std::array<float, 2> lastDelayOutput;
     
@@ -50,6 +56,7 @@ private:
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLine {delayBufferLength};
 
     juce::dsp::DryWetMixer<float> delayMixer;
+    juce::dsp::StateVariableTPTFilter<float> delayFilter;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)
 };

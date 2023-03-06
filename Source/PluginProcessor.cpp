@@ -12,7 +12,7 @@
 //==============================================================================
 CircularDelayAudioProcessor::CircularDelayAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : foleys::MagicProcessor (juce::AudioProcessor::BusesProperties()
+     : AudioProcessor(BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
@@ -24,7 +24,7 @@ CircularDelayAudioProcessor::CircularDelayAudioProcessor()
 #endif
 
 {
-    FOLEYS_SET_SOURCE_PATH(__FILE__);
+//    FOLEYS_SET_SOURCE_PATH(__FILE__);
 }
 
 CircularDelayAudioProcessor::~CircularDelayAudioProcessor()
@@ -147,35 +147,35 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         buffer.clear (i, 0, buffer.getNumSamples());
     
     delayEffect.setParameters();
-    delayEffect.setTime(getHostBpm());
+    delayEffect.setTimeInSamples(getHostBpm());
     delayEffect.process(buffer);
 }
 
 //==============================================================================
-//bool CircularDelayAudioProcessor::hasEditor() const
-//{
-//    return true; // (change this to false if you choose to not supply an editor)
-//}
-//
-//juce::AudioProcessorEditor* CircularDelayAudioProcessor::createEditor()
-//{
-////    return new CircularDelayAudioProcessorEditor (*this);
-//    return new juce::GenericAudioProcessorEditor (*this);
-//}
+bool CircularDelayAudioProcessor::hasEditor() const
+{
+    return true; // (change this to false if you choose to not supply an editor)
+}
+
+juce::AudioProcessorEditor* CircularDelayAudioProcessor::createEditor()
+{
+//    return new CircularDelayAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
+}
 
 //==============================================================================
-//void CircularDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
-//{
-//    // You should use this method to store your parameters in the memory block.
-//    // You could do that either as raw data, or use the XML or ValueTree classes
-//    // as intermediaries to make it easy to save and load complex data.
-//}
-//
-//void CircularDelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
-//{
-//    // You should use this method to restore your parameters from this memory block,
-//    // whose contents will have been created by the getStateInformation() call.
-//}
+void CircularDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    // You should use this method to store your parameters in the memory block.
+    // You could do that either as raw data, or use the XML or ValueTree classes
+    // as intermediaries to make it easy to save and load complex data.
+}
+
+void CircularDelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+{
+    // You should use this method to restore your parameters from this memory block,
+    // whose contents will have been created by the getStateInformation() call.
+}
 
 double CircularDelayAudioProcessor::getHostBpm() const
 {
@@ -195,11 +195,13 @@ CircularDelayAudioProcessor::createParameterLayout()
     using pID = juce::ParameterID;
     
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"TIME", 1}, "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
-    layout.add(std::make_unique<juce::AudioParameterInt>    (pID{"SYNC", 1}, "Sync", 0, 1, 1));
+    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Delay Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
+    layout.add(std::make_unique<juce::AudioParameterBool>   (pID{"SYNC", 1}, "Sync", true));
     layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Sync Time", juce::StringArray{"16th", "16th Triplet", "16th Dotted",
                                                              "8th", "8th Triplet", "8th Dotted", "Quarter", "Quarter Triplet", "Quarter Dotted",
                                                              "Half", "Half Triplet", "Half Dotted", "Whole"}, 3, "Sync Time"));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"WIDTH", 1}, "Width", juce::NormalisableRange<float> {0.0f, 10.0f, 1.0f}, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
     return layout;
 }
