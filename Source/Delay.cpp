@@ -25,7 +25,7 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     numChannels = spec.numChannels;
         
     delayMixer.prepare(spec);
-    smoothDelayTime.reset(sampleRate, 0.05f);
+    smoothDelayTime.reset(static_cast<int>(300 * sampleRate * 1000));
     
     float feedbackParameter = getFeedback();
     float feedback = feedbackParameter / 100.0f;
@@ -46,28 +46,28 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
     const auto& input = context.getInputBlock();
     const auto& output = context.getOutputBlock();
-        
+    
+    float FB = smoothFeedback.getNextValue();
+    
     delayMixer.pushDrySamples(input);
         
     for (auto channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-        float FB = smoothFeedback.getNextValue();
-        float TIME = smoothDelayTime.getNextValue();
+        delayLine.setDelay(smoothDelayTime.getNextValue());
         
         auto *samplesIn = input.getChannelPointer(channel);
         auto *samplesOut = output.getChannelPointer(channel);
                 
         for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
-            delayLine.setDelay(TIME);
-            
             auto input = samplesIn[sample] - lastDelayOutput[channel];
             
-            delayLine.pushSample((int) channel, input);
+            delayLine.pushSample((int)channel, input);
             
             auto delayedSample = delayLine.popSample((int)channel);
             
             samplesOut[sample] = delayedSample + lastDelayOutput[channel];
+            
             lastDelayOutput[channel] = samplesOut[sample] * FB * 0.5f;
         }
     }
@@ -89,7 +89,7 @@ void Delay::setTime(double bpm)
     const int subdivisionIndex = getSyncTime();
     const float selectedSubdivision = subdivisions[subdivisionIndex];
     
-    if (getSync())
+    if (getSync()== 1)
     {
         delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
     }
