@@ -47,7 +47,11 @@ private:
     float rate = 0.0f; // Declare the rate variable
     
     constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
-    juce::SmoothedValue<float, juce::Interpolators::Linear> smoothDelayTime;
+    
+    juce::dsp::FirstOrderTPTFilter<double> smoothFilter;
+//    juce::SmoothedValue<float, juce::Interpolators::Linear> smoothDelayTime;
+    std::array<double, 2> delayValue;
+
     juce::SmoothedValue<float, juce::Interpolators::Linear> smoothWidth;
     juce::SmoothedValue<float> smoothFeedback;
     std::array<float, 2> lastDelayOutput;

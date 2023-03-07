@@ -14,8 +14,7 @@
 //==============================================================================
 /**
 */
-class CircularDelayAudioProcessor  : public juce::AudioProcessor,
-                                     public juce::AudioProcessorValueTreeState::Listener
+class CircularDelayAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
                             #endif
@@ -64,7 +63,7 @@ public:
     juce::AudioProcessorValueTreeState treeState {*this, nullptr, "Parameters", createParameterLayout()};
 
 private:
-    void parameterChanged (const juce::String& parameterID, float newValue) override;
+//    void parameterChanged (const juce::String& parameterID, float newValue) override;
     Delay delayEffect;
     
     double bpm = {0};

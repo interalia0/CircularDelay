@@ -148,7 +148,7 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         buffer.clear (i, 0, buffer.getNumSamples());
     
     delayEffect.setParameters();
-    delayEffect.setTimeInSamples(getHostBpm());
+//    delayEffect.setTimeInSamples(getHostBpm());
     delayEffect.process(buffer);
     
 }

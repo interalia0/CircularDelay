@@ -29,12 +29,14 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     delayFilter.prepare(spec);
     delayFilter.reset();
     setFilter();
-
+    smoothFilter.prepare(spec);
+    smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
+    
     delayLine.reset();
     delayLine.prepare(spec);
     delayLine.setMaximumDelayInSamples(3 * sampleRate);
     
-    smoothDelayTime.reset(300 * sampleRate * 1000);
+//    smoothDelayTime.reset(300 * sampleRate * 1000);
     std::fill (lastDelayOutput.begin(), lastDelayOutput.end(), 0.0f);
 }
 
@@ -45,13 +47,18 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     const auto& input = context.getInputBlock();
     const auto& output = context.getOutputBlock();
     
+    smoothFilter.setCutoffFrequency(1000 / 150);
     float FB = smoothFeedback.getNextValue();
+    
+    delayInSamples = getTime() / 1000 * sampleRate;
+    
+
     
     delayMixer.pushDrySamples(input);
         
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-        setTimeAndMode(channel);
+//        setTimeAndMode(channel);
         
         auto *samplesIn = input.getChannelPointer(channel);
         auto *samplesOut = output.getChannelPointer(channel);
@@ -59,13 +66,14 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
         for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
             auto input = samplesIn[sample] - lastDelayOutput[channel];
+
+            auto delay = smoothFilter.processSample (int (channel), delayInSamples);
             
-            delayLine.pushSample((int)channel, input);
-            
-            auto delayedSample = delayLine.popSample((int)channel);
-            delayedSample = delayFilter.processSample((int)channel, delayedSample);
-            
-            samplesOut[sample] = delayedSample + lastDelayOutput[channel];
+            delayLine.pushSample(int(channel), input);
+            delayLine.setDelay ((float) delay);
+            auto processed = delayLine.popSample (int (channel));
+            processed = delayFilter.processSample (int(channel), processed);
+            samplesOut[sample] = processed;
             
             lastDelayOutput[channel] = samplesOut[sample] * FB * 0.5f;
         }
@@ -84,48 +92,48 @@ void Delay::setParameters()
     delayMixer.setWetMixProportion(mix);
 }
 
-void Delay::setTimeInSamples(double bpm)
-{
-    const int subdivisionIndex = getSyncTime();
-    const float selectedSubdivision = subdivisions[subdivisionIndex];
-    
-    if (isSync())
-    {
-        delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
-    }
-    else
-    {
-        delayInSamples = getTime() / 1000 * sampleRate;
-    }
-        smoothDelayTime.setTargetValue(delayInSamples);
-}
+//void Delay::setTimeInSamples(double bpm)
+//{
+//    const int subdivisionIndex = getSyncTime();
+//    const float selectedSubdivision = subdivisions[subdivisionIndex];
+//    
+//    if (isSync())
+//    {
+//        delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
+//    }
+//    else
+//    {
+//        delayInSamples = getTime() / 1000 * sampleRate;
+//    }
+//        smoothDelayTime.setTargetValue(delayInSamples);
+//}
 
-void Delay::setTimeAndMode(int channel)
-{
-    if (isPingPong())
-    {
-        if (channel == 0)
-        {
-            delayLine.setDelay(smoothDelayTime.getNextValue() * 2);
-        }
-        if (channel == 1)
-        {
-            delayLine.setDelay(smoothDelayTime.getNextValue());
-        }
-    }
-    
-    else
-    {
-        if (channel == 0)
-        {
-            delayLine.setDelay(smoothDelayTime.getNextValue());
-        }
-        if (channel == 1)
-        {
-            delayLine.setDelay(smoothDelayTime.getNextValue() + getWidth());
-        }
-    }
-}
+//void Delay::setTimeAndMode(int channel)
+//{
+//    if (isPingPong())
+//    {
+//        if (channel == 0)
+//        {
+//            delayLine.setDelay(smoothDelayTime.getNextValue() * 2);
+//        }
+//        if (channel == 1)
+//        {
+//            delayLine.setDelay(smoothDelayTime.getNextValue());
+//        }
+//    }
+//    
+//    else
+//    {
+//        if (channel == 0)
+//        {
+//            delayLine.setDelay(smoothDelayTime.getNextValue());
+//        }
+//        if (channel == 1)
+//        {
+//            delayLine.setDelay(smoothDelayTime.getNextValue() + getWidth());
+//        }
+//    }
+//}
 
 void Delay::setFilter()
 {
