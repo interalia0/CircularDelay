@@ -28,7 +28,7 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     
     delayFilter.prepare(spec);
     delayFilter.reset();
-    setFilter();
+    setDelayFilter();
     smoothFilter.prepare(spec);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
     
@@ -36,7 +36,6 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     delayLine.prepare(spec);
     delayLine.setMaximumDelayInSamples(3 * sampleRate);
     
-//    smoothDelayTime.reset(300 * sampleRate * 1000);
     std::fill (lastDelayOutput.begin(), lastDelayOutput.end(), 0.0f);
 }
 
@@ -47,19 +46,13 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     const auto& input = context.getInputBlock();
     const auto& output = context.getOutputBlock();
     
-    smoothFilter.setCutoffFrequency(1000 / 150);
-    float FB = smoothFeedback.getNextValue();
-    
-    delayInSamples = getTime() / 1000 * sampleRate;
-    
 
-    
+    float FB = smoothFeedback.getNextValue();
+        
     delayMixer.pushDrySamples(input);
         
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
-//        setTimeAndMode(channel);
-        
         auto *samplesIn = input.getChannelPointer(channel);
         auto *samplesOut = output.getChannelPointer(channel);
                 
@@ -67,13 +60,14 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
         {
             auto input = samplesIn[sample] - lastDelayOutput[channel];
 
-            auto delay = smoothFilter.processSample (int (channel), delayInSamples);
+            auto smoothTime = smoothFilter.processSample (int (channel), delayInSamples);
             
             delayLine.pushSample(int(channel), input);
-            delayLine.setDelay ((float) delay);
-            auto processed = delayLine.popSample (int (channel));
-            processed = delayFilter.processSample (int(channel), processed);
-            samplesOut[sample] = processed;
+            
+            auto delayedSample = delayLine.popSample (int (channel), (float) smoothTime, true);
+            delayedSample = delayFilter.processSample (int(channel), delayedSample);
+            
+            samplesOut[sample] = delayedSample;
             
             lastDelayOutput[channel] = samplesOut[sample] * FB * 0.5f;
         }
@@ -84,72 +78,40 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
 void Delay::setParameters()
 {
     float feedback = getFeedback();
-    float width = getWidth();
     float mix = getMix();
     
     smoothFeedback.setCurrentAndTargetValue(feedback);
-    smoothWidth.setCurrentAndTargetValue(width);
     delayMixer.setWetMixProportion(mix);
+    smoothFilter.setCutoffFrequency(2);
 }
 
-//void Delay::setTimeInSamples(double bpm)
-//{
-//    const int subdivisionIndex = getSyncTime();
-//    const float selectedSubdivision = subdivisions[subdivisionIndex];
-//    
-//    if (isSync())
-//    {
-//        delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
-//    }
-//    else
-//    {
-//        delayInSamples = getTime() / 1000 * sampleRate;
-//    }
-//        smoothDelayTime.setTargetValue(delayInSamples);
-//}
+float Delay::setTimeInSamples(double bpm)
+{
+    const int subdivisionIndex = getSyncTime();
+    const float selectedSubdivision = subdivisions[subdivisionIndex];
+    
+    if (isSync())
+    {
+        delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
+    }
+    else
+    {
+        delayInSamples = getTime() / 1000 * sampleRate;
+    }
+    
+    return delayInSamples;
+}
 
-//void Delay::setTimeAndMode(int channel)
-//{
-//    if (isPingPong())
-//    {
-//        if (channel == 0)
-//        {
-//            delayLine.setDelay(smoothDelayTime.getNextValue() * 2);
-//        }
-//        if (channel == 1)
-//        {
-//            delayLine.setDelay(smoothDelayTime.getNextValue());
-//        }
-//    }
-//    
-//    else
-//    {
-//        if (channel == 0)
-//        {
-//            delayLine.setDelay(smoothDelayTime.getNextValue());
-//        }
-//        if (channel == 1)
-//        {
-//            delayLine.setDelay(smoothDelayTime.getNextValue() + getWidth());
-//        }
-//    }
-//}
-
-void Delay::setFilter()
+void Delay::setDelayFilter()
 {
     delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    delayFilter.setCutoffFrequency(2500);
+    delayFilter.setCutoffFrequency(3500);
 }
 
 
 bool Delay::isSync()
 {
     return *treeState.getRawParameterValue("SYNC");
-}
-
-bool Delay::isPingPong()
-{
-    return *treeState.getRawParameterValue("MODE");
 }
 
 float Delay::getSyncTime()
@@ -165,11 +127,6 @@ float Delay::getTime()
 float Delay::getFeedback()
 {
     return *treeState.getRawParameterValue("FEEDBACK");
-}
-
-float Delay::getWidth()
-{
-    return *treeState.getRawParameterValue("WIDTH");
 }
 
 float Delay::getMix()

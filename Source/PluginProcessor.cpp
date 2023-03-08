@@ -148,7 +148,7 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         buffer.clear (i, 0, buffer.getNumSamples());
     
     delayEffect.setParameters();
-//    delayEffect.setTimeInSamples(getHostBpm());
+    delayEffect.setTimeInSamples(getHostBpm());
     delayEffect.process(buffer);
     
 }
@@ -197,25 +197,15 @@ CircularDelayAudioProcessor::createParameterLayout()
     using pID = juce::ParameterID;
     
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"TIME", 1}, "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
-    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Delay Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
+//    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Delay Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
     layout.add(std::make_unique<juce::AudioParameterBool>   (pID{"SYNC", 1}, "Sync", true));
     layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Sync Time", juce::StringArray{"16th", "16th Triplet", "16th Dotted",
                                                              "8th", "8th Triplet", "8th Dotted", "Quarter", "Quarter Triplet", "Quarter Dotted",
                                                              "Half", "Half Triplet", "Half Dotted", "Whole"}, 3, "Sync Time"));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"WIDTH", 1}, "Width", juce::NormalisableRange<float> {0.0f, 10.0f, 1.0f}, 0.0f));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
     return layout;
 }
-
-//void CircularDelayAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
-//{
-//    if (parameterID == "TIME")
-//    {
-//        delayEffect.setTimeInSamples(getHostBpm());
-//    }
-//}
-
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

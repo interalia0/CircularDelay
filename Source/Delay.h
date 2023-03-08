@@ -20,10 +20,10 @@ public:
     void process(juce::AudioBuffer<float>& buffer);
     
     void setParameters();
-    void setTimeInSamples(double bpm);
+    float setTimeInSamples(double bpm);
             
 private:
-    void setFilter();
+    void setDelayFilter();
     void setTimeAndMode(int channel);
     
     bool isSync();
@@ -43,21 +43,12 @@ private:
     int delayBufferLength = {44100};
     int numChannels = {2};
     
-    float centsPerSemitone = 100.0f / 12.0f;
-    float rate = 0.0f; // Declare the rate variable
-    
-    constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
-    
+    constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};    
     juce::dsp::FirstOrderTPTFilter<double> smoothFilter;
-//    juce::SmoothedValue<float, juce::Interpolators::Linear> smoothDelayTime;
-    std::array<double, 2> delayValue;
-
-    juce::SmoothedValue<float, juce::Interpolators::Linear> smoothWidth;
     juce::SmoothedValue<float> smoothFeedback;
     std::array<float, 2> lastDelayOutput;
     
-//    std::array<juce::dsp::DelayLine<float>, 2> delayLines {{juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd>(delayBufferLength), juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> (delayBufferLength)}};
-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLine {delayBufferLength};
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine {delayBufferLength};
 
     juce::dsp::DryWetMixer<float> delayMixer;
     juce::dsp::StateVariableTPTFilter<float> delayFilter;
