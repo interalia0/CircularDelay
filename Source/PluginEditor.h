@@ -10,6 +10,10 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/Dial.h"
+#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/EditorLnf.h"
+#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/EditorContent.h"
+#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/MyColours.h"
 
 //==============================================================================
 /**
@@ -17,21 +21,36 @@
 class CircularDelayAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    CircularDelayAudioProcessorEditor (CircularDelayAudioProcessor&);
+    CircularDelayAudioProcessorEditor (CircularDelayAudioProcessor&,
+                                       juce::AudioProcessorValueTreeState& treeState,
+                                       juce::UndoManager& undoManager);
     ~CircularDelayAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    bool keyPressed (const juce::KeyPress& key) override;
+    
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    
-//    foleys::MagicGUIState       magicState;
-//    foleys::MagicGUIBuilder     magicBuilder { magicState };
-    
     CircularDelayAudioProcessor& audioProcessor;
+    
+    juce::UndoManager& undoManager;
+    
+    EditorContent editorContent;
+
+    static constexpr int defaultWidth  { 440 };
+    static constexpr int defaultHeight { 280 };
+
+    struct SharedLnf
+    {
+        SharedLnf()  { juce::LookAndFeel::setDefaultLookAndFeel (&editorLnf); }
+        ~SharedLnf() { juce::LookAndFeel::setDefaultLookAndFeel (nullptr); }
+
+        EditorLnf editorLnf;
+    };
+
+    juce::SharedResourcePointer<SharedLnf> lnf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CircularDelayAudioProcessorEditor)
 };

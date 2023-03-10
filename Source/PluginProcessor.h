@@ -58,10 +58,10 @@ public:
     double getHostBpm() const;
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    juce::AudioProcessorValueTreeState treeState {*this, nullptr, "Parameters", createParameterLayout()};
+    juce::AudioProcessorValueTreeState treeState {*this, &undoManager, "Parameters", createParameterLayout()};
+    juce::UndoManager undoManager;
 
 private:
-//    void parameterChanged (const juce::String& parameterID, float newValue) override;
     Delay delayEffect;
     
     double bpm = {0};

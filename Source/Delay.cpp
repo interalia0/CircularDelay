@@ -63,9 +63,9 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     
     if (numChannels == 1 && getMode() == modePingPong)
     {
-        treeState.getParameter("MODE")->beginChangeGesture();
+//        treeState.getParameter("MODE")->beginChangeGesture();
         treeState.getParameter("MODE")->setValueNotifyingHost(0);
-        treeState.getParameter("MODE")->endChangeGesture();
+//        treeState.getParameter("MODE")->endChangeGesture();
     }
     
     if (getMode() == modePingPong && numChannels > 1)

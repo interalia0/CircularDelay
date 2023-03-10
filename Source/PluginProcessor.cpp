@@ -158,8 +158,8 @@ bool CircularDelayAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CircularDelayAudioProcessor::createEditor()
 {
-//    return new CircularDelayAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor (*this);
+    return new CircularDelayAudioProcessorEditor (*this, treeState, undoManager);
+//    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -193,11 +193,11 @@ CircularDelayAudioProcessor::createParameterLayout()
     using pID = juce::ParameterID;
     
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"TIME", 1}, "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
-    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Delay Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
     layout.add(std::make_unique<juce::AudioParameterBool>   (pID{"SYNC", 1}, "Sync", true));
-    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Sync Time", juce::StringArray{"16th", "16th Triplet", "16th Dotted",
-                                                             "8th", "8th Triplet", "8th Dotted", "Quarter", "Quarter Triplet", "Quarter Dotted",
-                                                             "Half", "Half Triplet", "Half Dotted", "Whole"}, 3, "Sync Time"));
+    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Note", juce::StringArray{"1/16", "1/16 Triplet", "16th Dotted",
+                                                             "1/8", "1/8 Triplet", "1/8 Dotted", "1/4", "1/4 Triplet", "1/4 Dotted",
+                                                             "1/2", "1/2 Triplet", "1/2 Dotted", "1"}, 3, "Sync Time"));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
     return layout;
