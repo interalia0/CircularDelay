@@ -26,17 +26,27 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
         
     delayMixer.prepare(spec);
     
-    delayFilter.prepare(spec);
-    delayFilter.reset();
-    setDelayFilter();
     smoothFilter.prepare(spec);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
     
-    delayLine.reset();
-    delayLine.prepare(spec);
-    delayLine.setMaximumDelayInSamples(3 * sampleRate);
+    delayL.reset();
+    delayL.prepare(spec);
+    delayL.setMaximumDelayInSamples(3 * sampleRate);
+    delayR.reset();
+    delayR.prepare(spec);
+    delayR.setMaximumDelayInSamples(3 * sampleRate);
     
-    std::fill (lastDelayOutput.begin(), lastDelayOutput.end(), 0.0f);
+    delayStereo.reset();
+    delayStereo.prepare(spec);
+    delayStereo.setMaximumDelayInSamples(3 * sampleRate);
+        
+    delayFilter.prepare(spec);
+    delayFilter.reset();
+    setDelayFilter();
+    
+    std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
+    std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
+    std::fill (lastDelayOutputR.begin(), lastDelayOutputR.end(), 0.0f);
 }
 
 void Delay::process(juce::AudioBuffer<float>& buffer)
@@ -46,30 +56,62 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     const auto& input = context.getInputBlock();
     const auto& output = context.getOutputBlock();
     
-
     float FB = smoothFeedback.getNextValue();
-        
+    
     delayMixer.pushDrySamples(input);
-        
-    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+    
+    if (isPingPong() == true)
     {
-        auto *samplesIn = input.getChannelPointer(channel);
-        auto *samplesOut = output.getChannelPointer(channel);
-                
-        for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+        auto *samplesInL = input.getChannelPointer(0);
+        auto *samplesOutL = output.getChannelPointer(0);
+        auto *samplesInR = input.getChannelPointer(1);
+        auto *samplesOutR = output.getChannelPointer(1);
+        
+        for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
         {
-            auto input = samplesIn[sample] - lastDelayOutput[channel];
+            auto delayPingPong = smoothFilter.processSample(0, delayInSamples);
 
-            auto smoothTime = smoothFilter.processSample (int (channel), delayInSamples);
+            auto inputL = samplesInL[sample];
+            auto inputR = samplesInR[sample];
             
-            delayLine.pushSample(int(channel), input);
+            delayL.pushSample(0, inputR + lastDelayOutputR[1] * FB);
+            delayR.pushSample(1, inputL + lastDelayOutputL[0] * FB);
             
-            auto delayedSample = delayLine.popSample (int (channel), (float) smoothTime, true);
-            delayedSample = delayFilter.processSample (int(channel), delayedSample);
+            auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
+            delayedSampleL = delayFilter.processSample(0, delayedSampleL);
             
-            samplesOut[sample] = delayedSample;
+            auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
+            delayedSampleR = delayFilter.processSample(1, delayedSampleR);
             
-            lastDelayOutput[channel] = samplesOut[sample] * FB * 0.5f;
+            samplesOutL[sample] = delayedSampleL;
+            lastDelayOutputL[0] = samplesOutL[sample] * FB;
+            
+            samplesOutR[sample] = delayedSampleR;
+            lastDelayOutputR[1] = samplesOutR[sample] * FB;
+        }
+    }
+    
+    if (isPingPong() == false)
+    {
+        for (size_t channel = 0; channel < buffer.getNumChannels(); ++channel)
+        {
+            auto *samplesInStereo = input.getChannelPointer(channel);
+            auto *samplesOutStereo = output.getChannelPointer(channel);
+            
+            for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
+            {
+                auto delay = smoothFilter.processSample(int(channel), delayInSamples);
+                
+                auto input = samplesInStereo[sample] - lastDelayOutputStereo[channel];
+                
+                delayStereo.pushSample(int(channel), input);
+                
+                auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
+                delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
+                
+                samplesOutStereo[sample] = delayedSampleStereo;
+                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * FB;
+            }
         }
     }
     delayMixer.mixWetSamples(output);
@@ -114,6 +156,11 @@ bool Delay::isSync()
     return *treeState.getRawParameterValue("SYNC");
 }
 
+bool Delay::isPingPong()
+{
+    return *treeState.getRawParameterValue("MODE");
+}
+
 float Delay::getSyncTime()
 {
     return *treeState.getRawParameterValue("SYNC_TIME");
@@ -133,5 +180,3 @@ float Delay::getMix()
 {
     return *treeState.getRawParameterValue("MIX");
 }
-
-

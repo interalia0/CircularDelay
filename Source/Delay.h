@@ -18,14 +18,12 @@ public:
     ~Delay();
     void prepare(juce::dsp::ProcessSpec spec);
     void process(juce::AudioBuffer<float>& buffer);
-    
     void setParameters();
     float setTimeInSamples(double bpm);
             
 private:
     void setDelayFilter();
-    void setTimeAndMode(int channel);
-    
+    void setTimeAndMode(int channel);    
     bool isSync();
     bool isPingPong();
     float getSyncTime();
@@ -33,22 +31,27 @@ private:
     float getFeedback();
     float getWidth();
     float getMix();
-    
-    
+        
     juce::AudioProcessorValueTreeState& treeState;
     
-    float delayInSamples = {0};
-    double sampleRate = {44100.f};
-    int samplesPerBlock = {512};
-    int delayBufferLength = {44100};
-    int numChannels = {2};
+    float delayInSamples = 0;
+    double sampleRate = 44100;
+    int samplesPerBlock = 512;
+    int delayBufferLength = 44100;
+    int numChannels = 2;
+
+    constexpr static const std::array<float, 13> subdivisions{0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
     
-    constexpr static const std::array<float, 13> subdivisions{ 0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};    
     juce::dsp::FirstOrderTPTFilter<double> smoothFilter;
     juce::SmoothedValue<float> smoothFeedback;
-    std::array<float, 2> lastDelayOutput;
     
-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine {delayBufferLength};
+    std::array<float, 2> lastDelayOutputStereo;
+    std::array<float, 2> lastDelayOutputL;
+    std::array<float, 2> lastDelayOutputR;
+
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayL {delayBufferLength};
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayR {delayBufferLength};
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayStereo {delayBufferLength};
 
     juce::dsp::DryWetMixer<float> delayMixer;
     juce::dsp::StateVariableTPTFilter<float> delayFilter;
