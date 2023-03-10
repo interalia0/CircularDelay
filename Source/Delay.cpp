@@ -25,6 +25,7 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     numChannels = spec.numChannels;
         
     delayMixer.prepare(spec);
+    delayMixer.setMixingRule(juce::dsp::DryWetMixingRule::balanced);
     
     smoothFilter.prepare(spec);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
@@ -56,11 +57,18 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     const auto& input = context.getInputBlock();
     const auto& output = context.getOutputBlock();
     
-    float FB = smoothFeedback.getNextValue();
+    float feedback = smoothFeedback.getNextValue();
     
     delayMixer.pushDrySamples(input);
     
-    if (isPingPong() == true)
+    if (numChannels == 1 && getMode() == modePingPong)
+    {
+        treeState.getParameter("MODE")->beginChangeGesture();
+        treeState.getParameter("MODE")->setValueNotifyingHost(0);
+        treeState.getParameter("MODE")->endChangeGesture();
+    }
+    
+    if (getMode() == modePingPong && numChannels > 1)
     {
         auto *samplesInL = input.getChannelPointer(0);
         auto *samplesOutL = output.getChannelPointer(0);
@@ -74,8 +82,8 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
             auto inputL = samplesInL[sample];
             auto inputR = samplesInR[sample];
             
-            delayL.pushSample(0, inputR + lastDelayOutputR[1] * FB);
-            delayR.pushSample(1, inputL + lastDelayOutputL[0] * FB);
+            delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
+            delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
             
             auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
             delayedSampleL = delayFilter.processSample(0, delayedSampleL);
@@ -84,14 +92,14 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
             delayedSampleR = delayFilter.processSample(1, delayedSampleR);
             
             samplesOutL[sample] = delayedSampleL;
-            lastDelayOutputL[0] = samplesOutL[sample] * FB;
+            lastDelayOutputL[0] = samplesOutL[sample] * feedback;
             
             samplesOutR[sample] = delayedSampleR;
-            lastDelayOutputR[1] = samplesOutR[sample] * FB;
+            lastDelayOutputR[1] = samplesOutR[sample] * feedback;
         }
     }
     
-    if (isPingPong() == false)
+    if (getMode() == modeStereo || numChannels == 1)
     {
         for (size_t channel = 0; channel < buffer.getNumChannels(); ++channel)
         {
@@ -110,7 +118,7 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
                 delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
                 
                 samplesOutStereo[sample] = delayedSampleStereo;
-                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * FB;
+                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
             }
         }
     }
@@ -124,7 +132,7 @@ void Delay::setParameters()
     
     smoothFeedback.setCurrentAndTargetValue(feedback);
     delayMixer.setWetMixProportion(mix);
-    smoothFilter.setCutoffFrequency(2);
+    smoothFilter.setCutoffFrequency(1.8);
 }
 
 float Delay::setTimeInSamples(double bpm)
@@ -135,6 +143,8 @@ float Delay::setTimeInSamples(double bpm)
     if (isSync())
     {
         delayInSamples = (60 / bpm) * selectedSubdivision * sampleRate;
+        float delayInMillisec =  delayInSamples / sampleRate * 1000.0f;
+        treeState.getParameter("TIME")->setValueNotifyingHost(juce::NormalisableRange<float>(1.0f, 3000.0f, 1.0f).convertTo0to1(delayInMillisec));
     }
     else
     {
@@ -147,7 +157,7 @@ float Delay::setTimeInSamples(double bpm)
 void Delay::setDelayFilter()
 {
     delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    delayFilter.setCutoffFrequency(3500);
+    delayFilter.setCutoffFrequency(5500);
 }
 
 
@@ -156,7 +166,7 @@ bool Delay::isSync()
     return *treeState.getRawParameterValue("SYNC");
 }
 
-bool Delay::isPingPong()
+int Delay::getMode()
 {
     return *treeState.getRawParameterValue("MODE");
 }

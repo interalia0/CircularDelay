@@ -24,12 +24,12 @@ public:
 private:
     void setDelayFilter();
     void setTimeAndMode(int channel);    
+    
     bool isSync();
-    bool isPingPong();
+    int getMode();
     float getSyncTime();
     float getTime();
     float getFeedback();
-    float getWidth();
     float getMix();
         
     juce::AudioProcessorValueTreeState& treeState;
@@ -39,6 +39,9 @@ private:
     int samplesPerBlock = 512;
     int delayBufferLength = 44100;
     int numChannels = 2;
+    
+    int modeStereo = 0;
+    int modePingPong = 1;
 
     constexpr static const std::array<float, 13> subdivisions{0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
     

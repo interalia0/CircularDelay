@@ -22,16 +22,13 @@ CircularDelayAudioProcessor::CircularDelayAudioProcessor()
                        ), delayEffect(treeState)
 
 #endif
-
 {
-    
 }
 
 CircularDelayAudioProcessor::~CircularDelayAudioProcessor()
 {
 }
                                     
-
 //==============================================================================
 const juce::String CircularDelayAudioProcessor::getName() const
 {
@@ -188,7 +185,6 @@ double CircularDelayAudioProcessor::getHostBpm() const
     }
     return bpm;
 }
-
 
 juce::AudioProcessorValueTreeState::ParameterLayout
 CircularDelayAudioProcessor::createParameterLayout()
