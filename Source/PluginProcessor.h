@@ -64,6 +64,7 @@ public:
 private:
     Delay delayEffect;
     
+    
     double bpm = {0};
     juce::AudioPlayHead* playHead;
     juce::AudioPlayHead::CurrentPositionInfo cpi;

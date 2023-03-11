@@ -63,9 +63,7 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     
     if (numChannels == 1 && getMode() == modePingPong)
     {
-//        treeState.getParameter("MODE")->beginChangeGesture();
         treeState.getParameter("MODE")->setValueNotifyingHost(0);
-//        treeState.getParameter("MODE")->endChangeGesture();
     }
     
     if (getMode() == modePingPong && numChannels > 1)
@@ -92,10 +90,10 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
             delayedSampleR = delayFilter.processSample(1, delayedSampleR);
             
             samplesOutL[sample] = delayedSampleL;
-            lastDelayOutputL[0] = samplesOutL[sample] * feedback;
+            lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.1;
             
             samplesOutR[sample] = delayedSampleR;
-            lastDelayOutputR[1] = samplesOutR[sample] * feedback;
+            lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.1;
         }
     }
     

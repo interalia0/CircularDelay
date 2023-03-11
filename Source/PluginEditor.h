@@ -10,10 +10,10 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/Dial.h"
-#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/EditorLnf.h"
-#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/EditorContent.h"
-#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/MyColours.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/Dial.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/EditorLnf.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/EditorContent.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
 
 //==============================================================================
 /**

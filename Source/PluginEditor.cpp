@@ -8,7 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "/Users/eljamarkkanen/Downloads/jg-granular-main/Source/GUI/MyColours.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
 
 //==============================================================================
 CircularDelayAudioProcessorEditor::CircularDelayAudioProcessorEditor (CircularDelayAudioProcessor& p,
@@ -38,6 +38,7 @@ CircularDelayAudioProcessorEditor::~CircularDelayAudioProcessorEditor()
 void CircularDelayAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (MyColours::black);
+
 }
 
 void CircularDelayAudioProcessorEditor::resized()

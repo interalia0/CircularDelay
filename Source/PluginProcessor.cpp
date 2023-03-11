@@ -165,15 +165,16 @@ juce::AudioProcessorEditor* CircularDelayAudioProcessor::createEditor()
 //==============================================================================
 void CircularDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    juce::MemoryOutputStream mos (destData, true);
+    treeState.state.writeToStream (mos);
 }
 
 void CircularDelayAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    auto tree = juce::ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
+
+    if (tree.isValid())
+        treeState.replaceState (tree);
 }
 
 double CircularDelayAudioProcessor::getHostBpm() const
@@ -198,8 +199,8 @@ CircularDelayAudioProcessor::createParameterLayout()
     layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Note", juce::StringArray{"1/16", "1/16 Triplet", "16th Dotted",
                                                              "1/8", "1/8 Triplet", "1/8 Dotted", "1/4", "1/4 Triplet", "1/4 Dotted",
                                                              "1/2", "1/2 Triplet", "1/2 Dotted", "1"}, 3, "Sync Time"));
-    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.1f}, 0.25f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.1f}, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.01f}, 0.25f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f}, 0.5f));
     return layout;
 }
 //==============================================================================
