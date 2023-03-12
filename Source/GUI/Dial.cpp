@@ -57,7 +57,7 @@ Dial::Dial (juce::RangedAudioParameter& param, juce::UndoManager* um)
 
     setWantsKeyboardFocus (true);
     setRepaintsOnMouseActivity (true);
-    setColour (foregroundArcColourId, juce::Colours::lightskyblue);
+    setColour (foregroundArcColourId, juce::Colours::aquamarine);
     setColour (backgroundArcColourId, MyColours::blackGrey);
     setColour (needleColourId,        MyColours::midGrey);
     setColour (borderColourId,        MyColours::grey);

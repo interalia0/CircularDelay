@@ -35,6 +35,7 @@ private:
     juce::AudioProcessorValueTreeState& treeState;
     
     float delayInSamples = 0;
+    float modulatedDelayInSamples;
     double sampleRate = 44100;
     int samplesPerBlock = 512;
     int delayBufferLength = 44100;
@@ -58,6 +59,7 @@ private:
 
     juce::dsp::DryWetMixer<float> delayMixer;
     juce::dsp::StateVariableTPTFilter<float> delayFilter;
+
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)
 };

@@ -23,8 +23,8 @@ CircularDelayAudioProcessorEditor::CircularDelayAudioProcessorEditor (CircularDe
     getConstrainer()->setFixedAspectRatio (ratio);
     getConstrainer()->setSizeLimits (defaultWidth / 2, defaultHeight / 2,
                                      defaultWidth * 2, defaultHeight * 2);
-    setSize (defaultWidth, defaultHeight);
-    editorContent.setSize (defaultWidth, defaultHeight);
+    setSize (defaultWidth * 1.5, defaultHeight * 1.5);
+    editorContent.setSize (defaultWidth * 1.5, defaultHeight * 1.5);
 
     addAndMakeVisible (editorContent);
 
