@@ -59,6 +59,8 @@ private:
 
     juce::dsp::DryWetMixer<float> delayMixer;
     juce::dsp::StateVariableTPTFilter<float> delayFilter;
+    
+    juce::dsp::Oscillator<float> wowOsc;   
 
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)

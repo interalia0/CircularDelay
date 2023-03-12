@@ -45,6 +45,12 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     delayFilter.reset();
     setDelayFilter();
     
+    wowOsc.initialise([](float x) {return std::sin(x); });
+    wowOsc.prepare(spec);
+    wowOsc.setFrequency(0.25);
+    
+
+    
     std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
     std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
     std::fill (lastDelayOutputR.begin(), lastDelayOutputR.end(), 0.0f);
@@ -76,12 +82,13 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
         for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
         {
             auto delayPingPong = smoothFilter.processSample(0, delayInSamples);
-
+            
             auto inputL = samplesInL[sample];
             auto inputR = samplesInR[sample];
             
             delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
             delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
+            
             
             auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
             delayedSampleL = delayFilter.processSample(0, delayedSampleL);
