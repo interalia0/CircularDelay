@@ -10,7 +10,7 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
       syncChoice (*treeState.getParameter ("SYNC"), &um),
       modeChoice   (*treeState.getParameter ("MODE"), &um),
       feedbackDial (*treeState.getParameter ("FEEDBACK"), &um),
-//      modDial  (*treeState.getParameter ("MOD"), &um),
+      modDial  (*treeState.getParameter ("MOD"), &um),
       mixDial   (*treeState.getParameter ("MIX"), &um)
 {
 
@@ -28,7 +28,7 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
     addAndMakeVisible (timeDial);
     addAndMakeVisible (feedbackDial);
     addAndMakeVisible (syncTimeDial);
-//    addAndMakeVisible (modDial);
+    addAndMakeVisible (modDial);
     addAndMakeVisible (mixDial);
     
     syncChoice.addListener(this);
@@ -49,7 +49,7 @@ void EditorContent::resized()
     syncChoice.setBounds  (230, 30,  80, 95);
     modeChoice.setBounds   (330, 30,  80, 95);
     feedbackDial.setBounds (80,  155, 80, 95);
-//    modDial.setBounds   (180, 155, 80, 95);
+    modDial.setBounds   (180, 155, 80, 95);
     mixDial.setBounds  (280, 155, 80, 95);
 }
 

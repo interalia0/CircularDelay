@@ -23,6 +23,7 @@ private:
          syncChoice,
          modeChoice,
          feedbackDial,
+         modDial,
          mixDial;
     
 //         gainDial;

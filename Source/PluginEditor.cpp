@@ -25,9 +25,8 @@ CircularDelayAudioProcessorEditor::CircularDelayAudioProcessorEditor (CircularDe
                                      defaultWidth * 2, defaultHeight * 2);
     setSize (defaultWidth * 1.5, defaultHeight * 1.5);
     editorContent.setSize (defaultWidth * 1.5, defaultHeight * 1.5);
-
+    
     addAndMakeVisible (editorContent);
-
 }
 
 CircularDelayAudioProcessorEditor::~CircularDelayAudioProcessorEditor()
@@ -38,7 +37,6 @@ CircularDelayAudioProcessorEditor::~CircularDelayAudioProcessorEditor()
 void CircularDelayAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (MyColours::black);
-
 }
 
 void CircularDelayAudioProcessorEditor::resized()

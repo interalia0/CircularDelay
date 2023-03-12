@@ -43,13 +43,15 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
         
     delayFilter.prepare(spec);
     delayFilter.reset();
+    delayHighpass.prepare(spec);
+    delayHighpass.reset();
     setDelayFilter();
     
-    wowOsc.initialise([](float x) {return std::sin(x); });
+    wowOsc.reset();
     wowOsc.prepare(spec);
-    wowOsc.setFrequency(0.25);
-    
-
+    wowOsc.setCentreDelay(5);
+    wowOsc.setMix(1);
+    wowOsc.setRate(2.5);
     
     std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
     std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
@@ -85,23 +87,23 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
             
             auto inputL = samplesInL[sample];
             auto inputR = samplesInR[sample];
-            
             delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
             delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
-            
-            
+                        
             auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
             delayedSampleL = delayFilter.processSample(0, delayedSampleL);
+            delayedSampleL = delayHighpass.processSample(0, delayedSampleL);
             
             auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
             delayedSampleR = delayFilter.processSample(1, delayedSampleR);
+            delayedSampleR = delayHighpass.processSample(1, delayedSampleR);
             
             samplesOutL[sample] = delayedSampleL;
-            lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.1;
-            
+            lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.15;
             samplesOutR[sample] = delayedSampleR;
-            lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.1;
+            lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.15;
         }
+        wowOsc.process(context);
     }
     
     if (getMode() == modeStereo || numChannels == 1)
@@ -123,9 +125,10 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
                 delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
                 
                 samplesOutStereo[sample] = delayedSampleStereo;
-                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
+                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback * 0.75;
             }
         }
+        wowOsc.process(context);
     }
     delayMixer.mixWetSamples(output);
 }
@@ -134,9 +137,11 @@ void Delay::setParameters()
 {
     float feedback = getFeedback();
     float mix = getMix();
+    float modDepth = getModAmount();
     
     smoothFeedback.setCurrentAndTargetValue(feedback);
     delayMixer.setWetMixProportion(mix);
+    wowOsc.setDepth(modDepth);
     smoothFilter.setCutoffFrequency(1.8);
 }
 
@@ -162,7 +167,10 @@ float Delay::setTimeInSamples(double bpm)
 void Delay::setDelayFilter()
 {
     delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    delayFilter.setCutoffFrequency(5500);
+    delayFilter.setCutoffFrequency(5700);
+    delayFilter.setResonance(0.8);
+    delayHighpass.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+    delayHighpass.setCutoffFrequency(600);
 }
 
 
@@ -189,6 +197,11 @@ float Delay::getTime()
 float Delay::getFeedback()
 {
     return *treeState.getRawParameterValue("FEEDBACK");
+}
+
+float Delay::getModAmount()
+{
+    return *treeState.getRawParameterValue("MOD");
 }
 
 float Delay::getMix()

@@ -30,6 +30,7 @@ private:
     float getSyncTime();
     float getTime();
     float getFeedback();
+    float getModAmount();
     float getMix();
         
     juce::AudioProcessorValueTreeState& treeState;
@@ -43,6 +44,7 @@ private:
     
     int modeStereo = 0;
     int modePingPong = 1;
+    float delayedSampleStereo = 0;
 
     constexpr static const std::array<float, 13> subdivisions{0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};
     
@@ -59,8 +61,11 @@ private:
 
     juce::dsp::DryWetMixer<float> delayMixer;
     juce::dsp::StateVariableTPTFilter<float> delayFilter;
+    juce::dsp::StateVariableTPTFilter<float> delayHighpass;
+
     
-    juce::dsp::Oscillator<float> wowOsc;   
+    
+    juce::dsp::Chorus<float> wowOsc;   
 
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)

@@ -5,11 +5,11 @@
   <MAINGROUP id="umlXET" name="CircularDelay">
     <GROUP id="{4453EFC8-F77A-A39C-522C-C846AD328FE4}" name="Source">
       <GROUP id="{FECA5FF3-E532-A52F-6622-56908EBBDB38}" name="GUI">
-        <FILE id="ySxrfx" name="Dial.cpp" compile="1" resource="0" file="../../../Downloads/jg-granular-main/Source/GUI/Dial.cpp"/>
-        <FILE id="L4z0tF" name="Dial.h" compile="0" resource="0" file="../../../Downloads/jg-granular-main/Source/GUI/Dial.h"/>
-        <FILE id="YRL0Pp" name="EditorLnf.cpp" compile="1" resource="0" file="../../../Downloads/jg-granular-main/Source/GUI/EditorLnf.cpp"/>
-        <FILE id="UUZaFS" name="EditorLnf.h" compile="0" resource="0" file="../../../Downloads/jg-granular-main/Source/GUI/EditorLnf.h"/>
-        <FILE id="GvZyX2" name="MyColours.h" compile="0" resource="0" file="../../../Downloads/jg-granular-main/Source/GUI/MyColours.h"/>
+        <FILE id="QuoI3O" name="Dial.cpp" compile="1" resource="0" file="Source/GUI/Dial.cpp"/>
+        <FILE id="IHGz8a" name="Dial.h" compile="0" resource="0" file="Source/GUI/Dial.h"/>
+        <FILE id="jS3SFo" name="EditorLnf.cpp" compile="1" resource="0" file="Source/GUI/EditorLnf.cpp"/>
+        <FILE id="v9CG8x" name="EditorLnf.h" compile="0" resource="0" file="Source/GUI/EditorLnf.h"/>
+        <FILE id="pxpgCW" name="MyColours.h" compile="0" resource="0" file="Source/GUI/MyColours.h"/>
       </GROUP>
       <FILE id="F1SWqj" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
@@ -18,18 +18,17 @@
       <FILE id="m1D8E2" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="GCltCU" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="Udyo1K" name="EditorContent.cpp" compile="1" resource="0"
-            file="../../../Downloads/jg-granular-main/Source/EditorContent.cpp"/>
-      <FILE id="l3RkLF" name="EditorContent.h" compile="0" resource="0" file="../../../Downloads/jg-granular-main/Source/EditorContent.h"/>
+      <FILE id="BTYZUa" name="EditorContent.cpp" compile="1" resource="0"
+            file="Source/EditorContent.cpp"/>
+      <FILE id="eE6YrP" name="EditorContent.h" compile="0" resource="0" file="Source/EditorContent.h"/>
       <FILE id="IOwEIw" name="Delay.cpp" compile="1" resource="0" file="Source/Delay.cpp"/>
       <FILE id="ThyffA" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>
     </GROUP>
-    <GROUP id="{19C4825D-9A04-473D-436C-BB1F5696AEF0}" name="Resources">
-      <FILE id="bkX61t" name="FuturaMedium.cpp" compile="1" resource="0"
-            file="../../../Downloads/jg-granular-main/Resources/FuturaMedium.cpp"/>
-      <FILE id="ZtgB0l" name="FuturaMedium.h" compile="0" resource="0" file="../../../Downloads/jg-granular-main/Resources/FuturaMedium.h"/>
-      <FILE id="j4pvm9" name="jg-granular.png" compile="0" resource="1" file="../../../Downloads/jg-granular-main/Resources/jg-granular.png"/>
-    </GROUP>
+    <GROUP id="{19C4825D-9A04-473D-436C-BB1F5696AEF0}" name="Resources"/>
+    <FILE id="MeyQRC" name="FuturaMedium.cpp" compile="1" resource="0"
+          file="Resources/FuturaMedium.cpp"/>
+    <FILE id="BGOlc7" name="FuturaMedium.h" compile="0" resource="0" file="Resources/FuturaMedium.h"/>
+    <FILE id="Y4AOpQ" name="jg-granular.png" compile="0" resource="1" file="Resources/jg-granular.png"/>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
                FOLEYS_SHOW_GUI_EDITOR_PALLETTE="0"/>

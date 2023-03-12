@@ -200,6 +200,7 @@ CircularDelayAudioProcessor::createParameterLayout()
                                                              "1/8", "1/8 Triplet", "1/8 Dotted", "1/4", "1/4 Triplet", "1/4 Dotted",
                                                              "1/2", "1/2 Triplet", "1/2 Dotted", "1"}, 3, "Sync Time"));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"FEEDBACK", 1}, "Feedback", juce::NormalisableRange<float> {0.0f, 1.0f, 0.01f}, 0.25f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MOD", 1}, "Mod", juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f, 0.7}, 0));
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"MIX", 1}, "Mix", juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f}, 0.5f));
     return layout;
 }
