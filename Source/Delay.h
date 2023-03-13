@@ -17,16 +17,17 @@ public:
     Delay(juce::AudioProcessorValueTreeState& treeState);
     ~Delay();
     void prepare(juce::dsp::ProcessSpec spec);
-    void process(juce::AudioBuffer<float>& buffer);
+    void processCircular(juce::AudioBuffer<float>& buffer);
+    void processStereo(juce::AudioBuffer<float>& buffer);
     void setParameters();
     float setTimeInSamples(double bpm);
+    int getMode();
             
 private:
     void setDelayFilter();
     void setTimeAndMode(int channel);    
     
     bool isSync();
-    int getMode();
     float getSyncTime();
     float getTime();
     float getFeedback();
@@ -42,8 +43,7 @@ private:
     int delayBufferLength = 44100;
     int numChannels = 2;
     
-    int modeStereo = 0;
-    int modePingPong = 1;
+
     float delayedSampleStereo = 0;
 
     constexpr static const std::array<float, 13> subdivisions{0.25f, (0.5f/3.0f), 0.375f, 0.5f, (1.0f/3.0f), 0.75f, 1.0f, (2.0f/3.0f), 1.5f, 2.0f, (4.0f/3.0f),3.0f, 4.0f};

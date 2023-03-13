@@ -63,7 +63,8 @@ public:
 
 private:
     Delay delayEffect;
-    
+    int modeStereo = 0;
+    int modePingPong = 1;
     
     double bpm = {0};
     juce::AudioPlayHead* playHead;

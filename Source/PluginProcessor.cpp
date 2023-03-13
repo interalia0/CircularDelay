@@ -143,10 +143,26 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
-    
+
+    const auto numChannels = juce::jmax (totalNumInputChannels, totalNumOutputChannels);
+
     delayEffect.setParameters();
     delayEffect.setTimeInSamples(getHostBpm());
-    delayEffect.process(buffer);
+    
+    
+    if (numChannels == 1 && delayEffect.getMode() == modePingPong)
+    {
+        treeState.getParameter("MODE")->setValueNotifyingHost(0);
+    }
+    
+    if (delayEffect.getMode() == modePingPong && numChannels > 1)
+    {
+        delayEffect.processCircular(buffer);
+    }
+    if (delayEffect.getMode() == modeStereo || numChannels == 1)
+    {
+        delayEffect.processStereo(buffer);
+    }
     
 }
 

@@ -49,16 +49,16 @@ void Delay::prepare(juce::dsp::ProcessSpec spec)
     
     wowOsc.reset();
     wowOsc.prepare(spec);
-    wowOsc.setCentreDelay(5);
+    wowOsc.setCentreDelay(1);
     wowOsc.setMix(1);
-    wowOsc.setRate(2.5);
+    wowOsc.setRate(0.5);
     
     std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
     std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
     std::fill (lastDelayOutputR.begin(), lastDelayOutputR.end(), 0.0f);
 }
 
-void Delay::process(juce::AudioBuffer<float>& buffer)
+void Delay::processCircular(juce::AudioBuffer<float>& buffer)
 {
     auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
     auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
@@ -69,67 +69,69 @@ void Delay::process(juce::AudioBuffer<float>& buffer)
     
     delayMixer.pushDrySamples(input);
     
-    if (numChannels == 1 && getMode() == modePingPong)
-    {
-        treeState.getParameter("MODE")->setValueNotifyingHost(0);
-    }
+    auto *samplesInL = input.getChannelPointer(0);
+    auto *samplesOutL = output.getChannelPointer(0);
+    auto *samplesInR = input.getChannelPointer(1);
+    auto *samplesOutR = output.getChannelPointer(1);
     
-    if (getMode() == modePingPong && numChannels > 1)
+    for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
     {
-        auto *samplesInL = input.getChannelPointer(0);
-        auto *samplesOutL = output.getChannelPointer(0);
-        auto *samplesInR = input.getChannelPointer(1);
-        auto *samplesOutR = output.getChannelPointer(1);
+        auto delayPingPong = smoothFilter.processSample(0, delayInSamples);
+        
+        auto inputL = samplesInL[sample];
+        auto inputR = samplesInR[sample];
+        delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
+        delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
+        
+        auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
+        delayedSampleL = delayFilter.processSample(0, delayedSampleL);
+        delayedSampleL = delayHighpass.processSample(0, delayedSampleL);
+        
+        auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
+        delayedSampleR = delayFilter.processSample(1, delayedSampleR);
+        delayedSampleR = delayHighpass.processSample(1, delayedSampleR);
+        
+        samplesOutL[sample] = delayedSampleL;
+        lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.15;
+        samplesOutR[sample] = delayedSampleR;
+        lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.15;
+    }
+    wowOsc.process(context);
+    delayMixer.mixWetSamples(output);
+}
+
+void Delay::processStereo(juce::AudioBuffer<float>& buffer)
+{
+    auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
+    auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
+    const auto& input = context.getInputBlock();
+    const auto& output = context.getOutputBlock();
+    
+    float feedback = smoothFeedback.getNextValue();
+    
+    delayMixer.pushDrySamples(input);
+    
+    for (size_t channel = 0; channel < buffer.getNumChannels(); ++channel)
+    {
+        auto *samplesInStereo = input.getChannelPointer(channel);
+        auto *samplesOutStereo = output.getChannelPointer(channel);
         
         for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
         {
-            auto delayPingPong = smoothFilter.processSample(0, delayInSamples);
+            auto delay = smoothFilter.processSample(int(channel), delayInSamples);
             
-            auto inputL = samplesInL[sample];
-            auto inputR = samplesInR[sample];
-            delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
-            delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
-                        
-            auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
-            delayedSampleL = delayFilter.processSample(0, delayedSampleL);
-            delayedSampleL = delayHighpass.processSample(0, delayedSampleL);
+            auto input = samplesInStereo[sample] - lastDelayOutputStereo[channel];
             
-            auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
-            delayedSampleR = delayFilter.processSample(1, delayedSampleR);
-            delayedSampleR = delayHighpass.processSample(1, delayedSampleR);
+            delayStereo.pushSample(int(channel), input);
             
-            samplesOutL[sample] = delayedSampleL;
-            lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.15;
-            samplesOutR[sample] = delayedSampleR;
-            lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.15;
+            auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
+            delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
+            
+            samplesOutStereo[sample] = delayedSampleStereo;
+            lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback * 0.75;
         }
-        wowOsc.process(context);
     }
-    
-    if (getMode() == modeStereo || numChannels == 1)
-    {
-        for (size_t channel = 0; channel < buffer.getNumChannels(); ++channel)
-        {
-            auto *samplesInStereo = input.getChannelPointer(channel);
-            auto *samplesOutStereo = output.getChannelPointer(channel);
-            
-            for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
-            {
-                auto delay = smoothFilter.processSample(int(channel), delayInSamples);
-                
-                auto input = samplesInStereo[sample] - lastDelayOutputStereo[channel];
-                
-                delayStereo.pushSample(int(channel), input);
-                
-                auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
-                delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
-                
-                samplesOutStereo[sample] = delayedSampleStereo;
-                lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback * 0.75;
-            }
-        }
-        wowOsc.process(context);
-    }
+    wowOsc.process(context);
     delayMixer.mixWetSamples(output);
 }
 
@@ -170,7 +172,7 @@ void Delay::setDelayFilter()
     delayFilter.setCutoffFrequency(5700);
     delayFilter.setResonance(0.8);
     delayHighpass.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-    delayHighpass.setCutoffFrequency(600);
+    delayHighpass.setCutoffFrequency(500);
 }
 
 
