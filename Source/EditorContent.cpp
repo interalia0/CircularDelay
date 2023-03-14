@@ -2,7 +2,8 @@
 
 #include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/EditorContent.h"
 #include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/EditorLnf.h"
-//#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+
 EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
                               juce::UndoManager& um)
     : timeDial (*treeState.getParameter ("TIME"), &um),
@@ -16,7 +17,6 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
 
     setWantsKeyboardFocus (true);
 
-    // Set interval of values changed by arrow keys or shift + arrow keys.
     timeDial.setInterval (5.0f);
     timeDial.setFineInterval (1.0f);
     syncTimeDial.setInterval (1.0f);

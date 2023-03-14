@@ -10,6 +10,7 @@
 
 #include "Delay.h"
 
+
 Delay::Delay(juce::AudioProcessorValueTreeState& state) : treeState(state)
 {
 }
@@ -18,41 +19,52 @@ Delay::~Delay()
 {
 }
 
-void Delay::prepare(juce::dsp::ProcessSpec spec)
+template <typename Func, typename... Items>
+constexpr void forEach (Func&& func, Items&&... items)
+{
+    (func (std::forward<Items> (items)), ...);
+}
+
+template <typename... Processors>
+void prepareAll (const juce::dsp::ProcessSpec& spec, Processors&... processors)
+{
+    forEach([&] (auto& proc) { proc.prepare (spec); }, processors...);
+}
+
+template <typename... Processors>
+void resetAll (Processors&... processors)
+{
+    forEach([] (auto& proc) { proc.reset(); }, processors...);
+}
+
+template <typename... DelayLines>
+void setMaxDelay (int maxDelayInSamples, DelayLines&... delayLines)
+{
+    forEach([&] (auto& delayLine) { delayLine.setMaximumDelayInSamples (maxDelayInSamples); }, delayLines...);
+}
+
+void Delay::prepare(const juce::dsp::ProcessSpec spec)
 {
     sampleRate = spec.sampleRate;
     samplesPerBlock = spec.maximumBlockSize;
     numChannels = spec.numChannels;
         
-    delayMixer.prepare(spec);
-    delayMixer.setMixingRule(juce::dsp::DryWetMixingRule::balanced);
+    prepareAll(spec, delayL, delayR, delayStereo, delayFilter, delayHighpass, delayMixer, wowOsc);
     
-    smoothFilter.prepare(spec);
+    setMaxDelay((3 * sampleRate), delayL, delayR, delayStereo);
+        
+    delayMixer.setMixingRule(juce::dsp::DryWetMixingRule::balanced);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
     
-    delayL.reset();
-    delayL.prepare(spec);
-    delayL.setMaximumDelayInSamples(3 * sampleRate);
-    delayR.reset();
-    delayR.prepare(spec);
-    delayR.setMaximumDelayInSamples(3 * sampleRate);
-    
-    delayStereo.reset();
-    delayStereo.prepare(spec);
-    delayStereo.setMaximumDelayInSamples(3 * sampleRate);
-        
-    delayFilter.prepare(spec);
-    delayFilter.reset();
-    delayHighpass.prepare(spec);
-    delayHighpass.reset();
     setDelayFilter();
-    
-    wowOsc.reset();
-    wowOsc.prepare(spec);
-    wowOsc.setCentreDelay(1);
-    wowOsc.setMix(1);
-    wowOsc.setRate(0.5);
-    
+    setWowOsc();
+
+}
+
+void Delay::reset()
+{
+    resetAll(delayL, delayR, delayStereo, delayFilter, delayHighpass, delayMixer, wowOsc);
+        
     std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
     std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
     std::fill (lastDelayOutputR.begin(), lastDelayOutputR.end(), 0.0f);
@@ -92,9 +104,9 @@ void Delay::processCircular(juce::AudioBuffer<float>& buffer)
         delayedSampleR = delayHighpass.processSample(1, delayedSampleR);
         
         samplesOutL[sample] = delayedSampleL;
-        lastDelayOutputL[0] = samplesOutL[sample] * feedback * 1.15;
+        lastDelayOutputL[0] = samplesOutL[sample] * feedback;
         samplesOutR[sample] = delayedSampleR;
-        lastDelayOutputR[1] = samplesOutR[sample] * feedback * 1.15;
+        lastDelayOutputR[1] = samplesOutR[sample] * feedback;
     }
     wowOsc.process(context);
     delayMixer.mixWetSamples(output);
@@ -128,14 +140,14 @@ void Delay::processStereo(juce::AudioBuffer<float>& buffer)
             delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
             
             samplesOutStereo[sample] = delayedSampleStereo;
-            lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback * 0.75;
+            lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
         }
     }
     wowOsc.process(context);
     delayMixer.mixWetSamples(output);
 }
 
-void Delay::setParameters()
+void Delay::updateParameters()
 {
     float feedback = getFeedback();
     float mix = getMix();
@@ -147,7 +159,7 @@ void Delay::setParameters()
     smoothFilter.setCutoffFrequency(1.8);
 }
 
-float Delay::setTimeInSamples(double bpm)
+float Delay::updateTimeInSamples(double bpm)
 {
     const int subdivisionIndex = getSyncTime();
     const float selectedSubdivision = subdivisions[subdivisionIndex];
@@ -169,10 +181,17 @@ float Delay::setTimeInSamples(double bpm)
 void Delay::setDelayFilter()
 {
     delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    delayFilter.setCutoffFrequency(5700);
-    delayFilter.setResonance(0.8);
+    delayFilter.setCutoffFrequency(5000);
+    delayFilter.setResonance(0.7);
     delayHighpass.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-    delayHighpass.setCutoffFrequency(500);
+    delayHighpass.setCutoffFrequency(400);
+}
+
+constexpr void Delay::setWowOsc()
+{
+    wowOsc.setCentreDelay(1);
+    wowOsc.setMix(1);
+    wowOsc.setRate(0.5);
 }
 
 

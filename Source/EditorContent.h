@@ -17,6 +17,7 @@ public:
 
     void resized() override;
     void dialValueChanged(Dial* dial) override;
+    
 private:
     Dial timeDial,
          syncTimeDial,
@@ -30,10 +31,5 @@ private:
     
 //    juce::ToggleButton syncButton;
 //    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> syncButtonAttachment;
-//
-//    juce::ComboBox modeChoice;
-//    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeChoiceAttachment;
-
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorContent)
 };

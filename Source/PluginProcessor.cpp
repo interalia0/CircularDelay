@@ -100,6 +100,7 @@ void CircularDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     spec.sampleRate = sampleRate;
 
     delayEffect.prepare(spec);
+    delayEffect.reset();
 }
 
 void CircularDelayAudioProcessor::releaseResources()
@@ -146,8 +147,8 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
     const auto numChannels = juce::jmax (totalNumInputChannels, totalNumOutputChannels);
 
-    delayEffect.setParameters();
-    delayEffect.setTimeInSamples(getHostBpm());
+    delayEffect.updateParameters();
+    delayEffect.updateTimeInSamples(getHostBpm());
     
     
     if (numChannels == 1 && delayEffect.getMode() == modePingPong)
