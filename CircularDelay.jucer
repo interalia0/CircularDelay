@@ -21,8 +21,8 @@
       <FILE id="BTYZUa" name="EditorContent.cpp" compile="1" resource="0"
             file="Source/EditorContent.cpp"/>
       <FILE id="eE6YrP" name="EditorContent.h" compile="0" resource="0" file="Source/EditorContent.h"/>
-      <FILE id="IOwEIw" name="Delay.cpp" compile="1" resource="0" file="Source/Delay.cpp"/>
-      <FILE id="ThyffA" name="Delay.h" compile="0" resource="0" file="Source/Delay.h"/>
+      <FILE id="UfTUT3" name="DelayEffect.cpp" compile="1" resource="0" file="Source/DelayEffect.cpp"/>
+      <FILE id="lWzwhX" name="DelayEffect.h" compile="0" resource="0" file="Source/DelayEffect.h"/>
     </GROUP>
     <GROUP id="{19C4825D-9A04-473D-436C-BB1F5696AEF0}" name="Resources">
       <FILE id="MeyQRC" name="FuturaMedium.cpp" compile="1" resource="0"

@@ -10,15 +10,6 @@
 
 #include "DelayEffect.h"
 
-
-DelayEffect::DelayEffect(juce::AudioProcessorValueTreeState& state) : treeState(state)
-{
-}
-
-DelayEffect::~DelayEffect()
-{
-}
-
 template <typename Func, typename... Items>
 constexpr void forEach (Func&& func, Items&&... items)
 {
@@ -41,6 +32,14 @@ template <typename... DelayLines>
 void setMaxDelay (int maxDelayInSamples, DelayLines&... delayLines)
 {
     forEach([&] (auto& delayLine) { delayLine.setMaximumDelayInSamples (maxDelayInSamples); }, delayLines...);
+}
+
+DelayEffect::DelayEffect(juce::AudioProcessorValueTreeState& state) : treeState(state)
+{
+}
+
+DelayEffect::~DelayEffect()
+{
 }
 
 void DelayEffect::prepare(const juce::dsp::ProcessSpec spec)
@@ -91,19 +90,19 @@ void DelayEffect::processCircular(juce::AudioBuffer<float>& buffer)
         
         auto inputL = samplesInL[sample];
         auto inputR = samplesInR[sample];
+        
         delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
         delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
         
         auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
-        delayedSampleL = delayFilter.processSample(0, delayedSampleL);
-        delayedSampleL = delayHighpass.processSample(0, delayedSampleL);
+        delayedSampleL = delayFilter.processSample(0, delayHighpass.processSample(0, delayedSampleL));
         
         auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
-        delayedSampleR = delayFilter.processSample(1, delayedSampleR);
-        delayedSampleR = delayHighpass.processSample(1, delayedSampleR);
+        delayedSampleR = delayFilter.processSample(1, delayHighpass.processSample(1, delayedSampleR));
         
         samplesOutL[sample] = delayedSampleL;
         lastDelayOutputL[0] = samplesOutL[sample] * feedback;
+        
         samplesOutR[sample] = delayedSampleR;
         lastDelayOutputR[1] = samplesOutR[sample] * feedback;
     }
@@ -136,8 +135,7 @@ void DelayEffect::processStereo(juce::AudioBuffer<float>& buffer)
             delayStereo.pushSample(int(channel), inputStereo);
             
             auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
-            delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
-            delayedSampleStereo = delayHighpass.processSample(int(channel), delayedSampleStereo);
+            delayedSampleStereo = delayFilter.processSample(int(channel), delayHighpass.processSample(int(channel), delayedSampleStereo));
             
             samplesOutStereo[sample] = delayedSampleStereo;
             lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
