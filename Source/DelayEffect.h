@@ -11,11 +11,11 @@
 #pragma once
 #include <JuceHeader.h>
 
-class Delay
+class DelayEffect
 {
 public:
-    Delay(juce::AudioProcessorValueTreeState& treeState);
-    ~Delay();
+    DelayEffect(juce::AudioProcessorValueTreeState& treeState);
+    ~DelayEffect();
     
     void prepare(const juce::dsp::ProcessSpec spec);
     void reset();
@@ -23,8 +23,8 @@ public:
     void processStereo(juce::AudioBuffer<float>& buffer);
     
     void updateParameters();
-    float updateTimeInSamples(double bpm);
-    int getMode();
+    void updateTimeInSamples(double bpm);
+    int getMode() const;
             
 private:
     
@@ -32,12 +32,12 @@ private:
     void setTimeAndMode(int channel);
     constexpr void setWowOsc();
     
-    bool isSync();
-    float getSyncTime();
-    float getTime();
-    float getFeedback();
-    float getModAmount();
-    float getMix();
+    bool isSync() const;
+    float getSyncTime() const;
+    float getTime() const;
+    float getFeedback() const;
+    float getModAmount() const;
+    float getMix() const;
         
     juce::AudioProcessorValueTreeState& treeState;
     
@@ -65,5 +65,5 @@ private:
     std::array<float, 2> lastDelayOutputL;
     std::array<float, 2> lastDelayOutputR;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Delay)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayEffect)
 };

@@ -3,8 +3,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Resources/FuturaMedium.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+#include "../Resources/FuturaMedium.h"
+#include "MyColours.h"
 
 class EditorLnf : public juce::LookAndFeel_V4
 {

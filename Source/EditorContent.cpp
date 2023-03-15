@@ -1,8 +1,8 @@
 
 
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/EditorContent.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/EditorLnf.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+#include "EditorContent.h"
+#include "GUI/EditorLnf.h"
+#include "GUI/MyColours.h"
 
 EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
                               juce::UndoManager& um)

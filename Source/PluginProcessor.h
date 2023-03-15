@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Delay.h"
+#include "DelayEffect.h"
 
 //==============================================================================
 /**
@@ -55,18 +55,18 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
-    double getHostBpm() const;
+    double getHostBpm();
     
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState treeState {*this, &undoManager, "Parameters", createParameterLayout()};
     juce::UndoManager undoManager;
 
 private:
-    Delay delayEffect;
-    int modeStereo = 0;
-    int modePingPong = 1;
+    DelayEffect delayEffect;
+    const int modeStereo = 0;
+    const int modePingPong = 1;
     
-    double bpm = {0};
+    double bpm = 0;
     juce::AudioPlayHead* playHead;
     juce::AudioPlayHead::CurrentPositionInfo cpi;
 

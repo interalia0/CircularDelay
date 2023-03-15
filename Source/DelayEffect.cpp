@@ -8,14 +8,14 @@
   ==============================================================================
 */
 
-#include "Delay.h"
+#include "DelayEffect.h"
 
 
-Delay::Delay(juce::AudioProcessorValueTreeState& state) : treeState(state)
+DelayEffect::DelayEffect(juce::AudioProcessorValueTreeState& state) : treeState(state)
 {
 }
 
-Delay::~Delay()
+DelayEffect::~DelayEffect()
 {
 }
 
@@ -43,7 +43,7 @@ void setMaxDelay (int maxDelayInSamples, DelayLines&... delayLines)
     forEach([&] (auto& delayLine) { delayLine.setMaximumDelayInSamples (maxDelayInSamples); }, delayLines...);
 }
 
-void Delay::prepare(const juce::dsp::ProcessSpec spec)
+void DelayEffect::prepare(const juce::dsp::ProcessSpec spec)
 {
     sampleRate = spec.sampleRate;
     samplesPerBlock = spec.maximumBlockSize;
@@ -58,10 +58,9 @@ void Delay::prepare(const juce::dsp::ProcessSpec spec)
     
     setDelayFilter();
     setWowOsc();
-
 }
 
-void Delay::reset()
+void DelayEffect::reset()
 {
     resetAll(delayL, delayR, delayStereo, delayFilter, delayHighpass, delayMixer, wowOsc);
         
@@ -70,7 +69,7 @@ void Delay::reset()
     std::fill (lastDelayOutputR.begin(), lastDelayOutputR.end(), 0.0f);
 }
 
-void Delay::processCircular(juce::AudioBuffer<float>& buffer)
+void DelayEffect::processCircular(juce::AudioBuffer<float>& buffer)
 {
     auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
     auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
@@ -112,7 +111,7 @@ void Delay::processCircular(juce::AudioBuffer<float>& buffer)
     delayMixer.mixWetSamples(output);
 }
 
-void Delay::processStereo(juce::AudioBuffer<float>& buffer)
+void DelayEffect::processStereo(juce::AudioBuffer<float>& buffer)
 {
     auto audioBlock = juce::dsp::AudioBlock<float> (buffer).getSubsetChannelBlock (0, (size_t) numChannels);
     auto context = juce::dsp::ProcessContextReplacing<float> (audioBlock);
@@ -132,12 +131,13 @@ void Delay::processStereo(juce::AudioBuffer<float>& buffer)
         {
             auto delay = smoothFilter.processSample(int(channel), delayInSamples);
             
-            auto input = samplesInStereo[sample] - lastDelayOutputStereo[channel];
+            auto inputStereo = samplesInStereo[sample] - lastDelayOutputStereo[channel];
             
-            delayStereo.pushSample(int(channel), input);
+            delayStereo.pushSample(int(channel), inputStereo);
             
             auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
             delayedSampleStereo = delayFilter.processSample(int(channel), delayedSampleStereo);
+            delayedSampleStereo = delayHighpass.processSample(int(channel), delayedSampleStereo);
             
             samplesOutStereo[sample] = delayedSampleStereo;
             lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
@@ -147,7 +147,7 @@ void Delay::processStereo(juce::AudioBuffer<float>& buffer)
     delayMixer.mixWetSamples(output);
 }
 
-void Delay::updateParameters()
+void DelayEffect::updateParameters()
 {
     float feedback = getFeedback();
     float mix = getMix();
@@ -159,7 +159,7 @@ void Delay::updateParameters()
     smoothFilter.setCutoffFrequency(1.8);
 }
 
-float Delay::updateTimeInSamples(double bpm)
+void DelayEffect::updateTimeInSamples(double bpm)
 {
     const int subdivisionIndex = getSyncTime();
     const float selectedSubdivision = subdivisions[subdivisionIndex];
@@ -174,11 +174,9 @@ float Delay::updateTimeInSamples(double bpm)
     {
         delayInSamples = getTime() / 1000 * sampleRate;
     }
-    
-    return delayInSamples;
 }
 
-void Delay::setDelayFilter()
+void DelayEffect::setDelayFilter()
 {
     delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
     delayFilter.setCutoffFrequency(5000);
@@ -187,7 +185,7 @@ void Delay::setDelayFilter()
     delayHighpass.setCutoffFrequency(400);
 }
 
-constexpr void Delay::setWowOsc()
+constexpr void DelayEffect::setWowOsc()
 {
     wowOsc.setCentreDelay(1);
     wowOsc.setMix(1);
@@ -195,37 +193,39 @@ constexpr void Delay::setWowOsc()
 }
 
 
-bool Delay::isSync()
+bool DelayEffect::isSync() const
 {
     return *treeState.getRawParameterValue("SYNC");
 }
 
-int Delay::getMode()
+int DelayEffect::getMode() const
 {
     return *treeState.getRawParameterValue("MODE");
 }
 
-float Delay::getSyncTime()
+float DelayEffect::getSyncTime() const
 {
     return *treeState.getRawParameterValue("SYNC_TIME");
 }
 
-float Delay::getTime()
+float DelayEffect::getTime() const
 {
     return *treeState.getRawParameterValue("TIME");
 }
 
-float Delay::getFeedback()
+float DelayEffect::getFeedback() const
 {
     return *treeState.getRawParameterValue("FEEDBACK");
 }
 
-float Delay::getModAmount()
+float DelayEffect::getModAmount() const
 {
     return *treeState.getRawParameterValue("MOD");
 }
 
-float Delay::getMix()
+float DelayEffect::getMix() const
 {
     return *treeState.getRawParameterValue("MIX");
 }
+
+

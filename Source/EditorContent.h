@@ -27,8 +27,6 @@ private:
          modDial,
          mixDial;
     
-//         gainDial;
-    
 //    juce::ToggleButton syncButton;
 //    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> syncButtonAttachment;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorContent)

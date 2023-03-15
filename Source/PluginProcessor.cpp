@@ -146,21 +146,22 @@ void CircularDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         buffer.clear (i, 0, buffer.getNumSamples());
 
     const auto numChannels = juce::jmax (totalNumInputChannels, totalNumOutputChannels);
+    int delayMode = delayEffect.getMode();
 
     delayEffect.updateParameters();
     delayEffect.updateTimeInSamples(getHostBpm());
-    
-    
-    if (numChannels == 1 && delayEffect.getMode() == modePingPong)
+        
+    if (numChannels == 1 && delayMode == modePingPong)
     {
         treeState.getParameter("MODE")->setValueNotifyingHost(0);
     }
     
-    if (delayEffect.getMode() == modePingPong && numChannels > 1)
+    if (delayMode == modePingPong && numChannels > 1)
     {
         delayEffect.processCircular(buffer);
     }
-    if (delayEffect.getMode() == modeStereo || numChannels == 1)
+    
+    if (delayMode == modeStereo || numChannels == 1)
     {
         delayEffect.processStereo(buffer);
     }
@@ -194,14 +195,19 @@ void CircularDelayAudioProcessor::setStateInformation (const void* data, int siz
         treeState.replaceState (tree);
 }
 
-double CircularDelayAudioProcessor::getHostBpm() const
+double CircularDelayAudioProcessor::getHostBpm()
 {
-    double bpm = 120;
     if (auto bpmFromHost = *getPlayHead()->getPosition()->getBpm())
     {
         bpm = bpmFromHost;
+        return bpm;
     }
-    return bpm;
+    else
+    {
+        treeState.getParameter("SYNC")->setValueNotifyingHost(0);
+        return 0;
+    }
+
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout

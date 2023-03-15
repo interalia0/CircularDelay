@@ -10,10 +10,10 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/Dial.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/EditorLnf.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/EditorContent.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+#include "GUI/Dial.h"
+#include "GUI/EditorLnf.h"
+#include "EditorContent.h"
+#include "GUI/MyColours.h"
 
 //==============================================================================
 /**

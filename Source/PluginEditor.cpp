@@ -8,7 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "/Users/eljamarkkanen/Programming/JUCE PROJECTS/CircularDelay/Source/GUI/MyColours.h"
+#include "GUI/MyColours.h"
 
 //==============================================================================
 CircularDelayAudioProcessorEditor::CircularDelayAudioProcessorEditor (CircularDelayAudioProcessor& p,
