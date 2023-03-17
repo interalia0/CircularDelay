@@ -218,6 +218,7 @@ CircularDelayAudioProcessor::createParameterLayout()
     
     layout.add(std::make_unique<juce::AudioParameterFloat>  (pID{"TIME", 1}, "Time", juce::NormalisableRange<float> {1.0f, 3000.0f, 1.0f}, 250.0f));
     layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"MODE", 1}, "Mode", juce::StringArray{"Stereo", "Ping-Pong"}, 0));
+    layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"STYLE", 1}, "Style", juce::StringArray{"Tape", "Digital"}, 0));
     layout.add(std::make_unique<juce::AudioParameterBool>   (pID{"SYNC", 1}, "Sync", true));
     layout.add(std::make_unique<juce::AudioParameterChoice> (pID{"SYNC_TIME", 1}, "Note", juce::StringArray{"1/16", "1/16 Triplet", "16th Dotted",
                                                              "1/8", "1/8 Triplet", "1/8 Dotted", "1/4", "1/4 Triplet", "1/4 Dotted",

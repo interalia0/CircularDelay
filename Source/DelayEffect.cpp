@@ -48,20 +48,21 @@ void DelayEffect::prepare(const juce::dsp::ProcessSpec spec)
     samplesPerBlock = spec.maximumBlockSize;
     numChannels = spec.numChannels;
         
-    prepareAll(spec, delayL, delayR, delayStereo, delayFilter, delayHighpass, delayMixer, wowOsc);
+    prepareAll(spec, delayL, delayR, delayStereo, delayMixer, wowOsc, tapeDelay, digitalDelay);
     
     setMaxDelay((3 * sampleRate), delayL, delayR, delayStereo);
         
     delayMixer.setMixingRule(juce::dsp::DryWetMixingRule::balanced);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
     
-    setDelayFilter();
+//    setDelayFilter();
     setWowOsc();
+
 }
 
 void DelayEffect::reset()
 {
-    resetAll(delayL, delayR, delayStereo, delayFilter, delayHighpass, delayMixer, wowOsc);
+    resetAll(delayL, delayR, delayStereo, delayMixer, wowOsc);
         
     std::fill (lastDelayOutputStereo.begin(), lastDelayOutputStereo.end(), 0.0f);
     std::fill (lastDelayOutputL.begin(), lastDelayOutputL.end(), 0.0f);
@@ -95,11 +96,11 @@ void DelayEffect::processCircular(juce::AudioBuffer<float>& buffer)
         delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
         
         auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
-        delayedSampleL = delayFilter.processSample(0, delayHighpass.processSample(0, delayedSampleL));
+        delayedSampleL = setStyle(0, delayedSampleL);
         
         auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
-        delayedSampleR = delayFilter.processSample(1, delayHighpass.processSample(1, delayedSampleR));
-        
+        delayedSampleR = setStyle(1, delayedSampleR);
+
         samplesOutL[sample] = delayedSampleL;
         lastDelayOutputL[0] = samplesOutL[sample] * feedback;
         
@@ -135,7 +136,7 @@ void DelayEffect::processStereo(juce::AudioBuffer<float>& buffer)
             delayStereo.pushSample(int(channel), inputStereo);
             
             auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
-            delayedSampleStereo = delayFilter.processSample(int(channel), delayHighpass.processSample(int(channel), delayedSampleStereo));
+            delayedSampleStereo = setStyle(int(channel), delayedSampleStereo);
             
             samplesOutStereo[sample] = delayedSampleStereo;
             lastDelayOutputStereo[channel] = samplesOutStereo[sample] * feedback;
@@ -154,7 +155,25 @@ void DelayEffect::updateParameters()
     smoothFeedback.setCurrentAndTargetValue(feedback);
     delayMixer.setWetMixProportion(mix);
     wowOsc.setDepth(modDepth);
-    smoothFilter.setCutoffFrequency(1.8);
+    smoothFilter.setCutoffFrequency(1.8);    
+}
+
+float DelayEffect::setStyle(int channel, float sample)
+{
+
+    int selectedDelayStyle = getStyle();
+    
+    if (selectedDelayStyle == 0)
+    {
+        sample = tapeDelay.processSample(channel, sample);
+    }
+    
+    if (selectedDelayStyle == 1)
+    {
+        sample = digitalDelay.processSample(channel, sample);
+    }
+    
+    return sample;
 }
 
 void DelayEffect::updateTimeInSamples(double bpm)
@@ -174,15 +193,6 @@ void DelayEffect::updateTimeInSamples(double bpm)
     }
 }
 
-void DelayEffect::setDelayFilter()
-{
-    delayFilter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-    delayFilter.setCutoffFrequency(5000);
-    delayFilter.setResonance(0.7);
-    delayHighpass.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-    delayHighpass.setCutoffFrequency(400);
-}
-
 constexpr void DelayEffect::setWowOsc()
 {
     wowOsc.setCentreDelay(1);
@@ -199,6 +209,11 @@ bool DelayEffect::isSync() const
 int DelayEffect::getMode() const
 {
     return *treeState.getRawParameterValue("MODE");
+}
+
+int DelayEffect::getStyle() const
+{
+    return *treeState.getRawParameterValue("STYLE");
 }
 
 float DelayEffect::getSyncTime() const
