@@ -4,6 +4,15 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="umlXET" name="CircularDelay">
     <GROUP id="{4453EFC8-F77A-A39C-522C-C846AD328FE4}" name="Source">
+      <GROUP id="{0D2577D9-9820-A030-EBAF-941EA35802C9}" name="DelayStyles">
+        <FILE id="oRrqr3" name="DelayStyleProcessor.h" compile="0" resource="0"
+              file="Source/DelayStyleProcessor.h"/>
+        <FILE id="QGNDOr" name="DigitalDelay.cpp" compile="1" resource="0"
+              file="Source/DigitalDelay.cpp"/>
+        <FILE id="URXxYi" name="DigitalDelay.h" compile="0" resource="0" file="Source/DigitalDelay.h"/>
+        <FILE id="XQhjXg" name="TapeDelay.cpp" compile="1" resource="0" file="Source/TapeDelay.cpp"/>
+        <FILE id="TX7EjK" name="TapeDelay.h" compile="0" resource="0" file="Source/TapeDelay.h"/>
+      </GROUP>
       <GROUP id="{FECA5FF3-E532-A52F-6622-56908EBBDB38}" name="GUI">
         <FILE id="QuoI3O" name="Dial.cpp" compile="1" resource="0" file="Source/GUI/Dial.cpp"/>
         <FILE id="IHGz8a" name="Dial.h" compile="0" resource="0" file="Source/GUI/Dial.h"/>

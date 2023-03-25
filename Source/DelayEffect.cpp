@@ -80,25 +80,22 @@ void DelayEffect::processCircular(juce::AudioBuffer<float>& buffer)
     
     delayMixer.pushDrySamples(input);
     
-    auto *samplesInL = input.getChannelPointer(0);
+    auto *samplesIn = input.getChannelPointer(0);
     auto *samplesOutL = output.getChannelPointer(0);
-    auto *samplesInR = input.getChannelPointer(1);
     auto *samplesOutR = output.getChannelPointer(1);
     
     for (size_t sample = 0; sample < input.getNumSamples(); ++sample)
     {
         auto delayPingPong = smoothFilter.processSample(0, delayInSamples);
         
-        auto inputL = samplesInL[sample];
-        auto inputR = samplesInR[sample];
+        auto input = samplesIn[sample];
         
-        delayL.pushSample(0, inputR + lastDelayOutputR[1] * feedback);
-        delayR.pushSample(1, inputL + lastDelayOutputL[0] * feedback);
-        
+        delayL.pushSample(0, input + lastDelayOutputR[1] * feedback);
         auto delayedSampleL = delayL.popSample(0, delayPingPong, true);
         delayedSampleL = setStyle(0, delayedSampleL);
-        
-        auto delayedSampleR = delayR.popSample(1, delayPingPong * 2, true);
+                
+        delayR.pushSample(1, delayedSampleL * feedback);
+        auto delayedSampleR = delayR.popSample(1, delayPingPong, true);
         delayedSampleR = setStyle(1, delayedSampleR);
 
         samplesOutL[sample] = delayedSampleL;
