@@ -10,9 +10,9 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "DelayStyleProcessor.h"
-#include "TapeDelay.h"
-#include "DigitalDelay.h"
+#include "DelayStyles/DelayStyleProcessor.h"
+#include "DelayStyles/TapeDelay.h"
+#include "DelayStyles/DigitalDelay.h"
 
 class DelayEffect
 {
@@ -34,14 +34,17 @@ private:
     void setTimeAndMode(int channel);
     constexpr void setWowOsc();
     float setStyle(int channel, float sample);
+    void setResetRequired(bool shouldReset);
     
     bool isSync() const;
     float getSyncTime() const;
     float getTime() const;
     int getStyle() const;
     float getFeedback() const;
+    float getDiffusion() const;
     float getModAmount() const;
     float getMix() const;
+    
         
     juce::AudioProcessorValueTreeState& treeState;
     juce::dsp::ProcessSpec spec;

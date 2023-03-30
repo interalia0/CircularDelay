@@ -100,13 +100,11 @@ void CircularDelayAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     spec.sampleRate = sampleRate;
 
     delayEffect.prepare(spec);
-    delayEffect.reset();
 }
 
 void CircularDelayAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    delayEffect.reset();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations

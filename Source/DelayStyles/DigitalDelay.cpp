@@ -18,12 +18,8 @@ DigitalDelay::~DigitalDelay()
 {
 }
 
-void DigitalDelay::prepare(const juce::dsp::ProcessSpec spec)
+void DigitalDelay::prepare(const juce::dsp::ProcessSpec& spec)
 {
-    sampleRate = spec.sampleRate;
-    samplesPerBlock = spec.maximumBlockSize;
-    numChannels = spec.numChannels;
-    
     digitalHighpass.prepare(spec);
     digitalHighpass.setType(juce::dsp::StateVariableTPTFilterType::highpass);
     digitalHighpass.setCutoffFrequency(250);

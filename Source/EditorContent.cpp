@@ -12,7 +12,7 @@ EditorContent::EditorContent (juce::AudioProcessorValueTreeState& treeState,
       modeChoice   (*treeState.getParameter ("MODE"), &um),
       feedbackDial (*treeState.getParameter ("FEEDBACK"), &um),
       modDial      (*treeState.getParameter ("MOD"), &um),
-      styleChoice  (*treeState.getParameter("STYLE"), &um),
+      styleChoice  (*treeState.getParameter ("STYLE"), &um),
       mixDial      (*treeState.getParameter ("MIX"), &um)
 {
 
@@ -52,6 +52,7 @@ void EditorContent::resized()
     syncChoice.setBounds   (230, 20,  100, 105);
     modeChoice.setBounds   (330, 30,  80, 95);
     
+
     modDial.setBounds      (30, 155, 80, 95);
     feedbackDial.setBounds (130,  145, 100, 105);
     mixDial.setBounds      (230, 145, 100, 105);

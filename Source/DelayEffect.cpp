@@ -55,9 +55,7 @@ void DelayEffect::prepare(const juce::dsp::ProcessSpec spec)
     delayMixer.setMixingRule(juce::dsp::DryWetMixingRule::balanced);
     smoothFilter.setType(juce::dsp::FirstOrderTPTFilterType::lowpass);
     
-//    setDelayFilter();
     setWowOsc();
-
 }
 
 void DelayEffect::reset()
@@ -133,6 +131,7 @@ void DelayEffect::processStereo(juce::AudioBuffer<float>& buffer)
             delayStereo.pushSample(int(channel), inputStereo);
             
             auto delayedSampleStereo = delayStereo.popSample(int(channel), delay, true);
+            
             delayedSampleStereo = setStyle(int(channel), delayedSampleStereo);
             
             samplesOutStereo[sample] = delayedSampleStereo;
@@ -169,7 +168,7 @@ float DelayEffect::setStyle(int channel, float sample)
     {
         sample = digitalDelay.processSample(channel, sample);
     }
-    
+
     return sample;
 }
 
@@ -237,5 +236,3 @@ float DelayEffect::getMix() const
 {
     return *treeState.getRawParameterValue("MIX");
 }
-
-
